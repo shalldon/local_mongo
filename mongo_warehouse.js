@@ -22,7 +22,7 @@ lines.on('line', function(line, lineCount, byteCount) {
     item.contact_name = arr[7];
     item.contact_mobile = arr[8];
     item.latitude = parseFloat(arr[9])? parseFloat(arr[9]) : null;
-    item.longtitude = parseFloat(arr[10])? parseFloat(arr[10]) : null;
+    item.longitude = parseFloat(arr[10])? parseFloat(arr[10]) : null;
 
     // var leftStr = arr.slice(12);
     // var reg = /^\{([\w\w]*)\}$/;

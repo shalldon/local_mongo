@@ -15,6 +15,9 @@ MongoClient.connect(url, function(err, db) {
   var lines = readline('./files/31JUL_shipping_points.csv');
   lines.on('line', function(line, lineCount, byteCount) {
     if (lineCount == 1) return;
+    if (lineCount % 1000 === 0) {
+      console.log(lineCount);
+    }
     var arr = line.split(',');
     var item = {};
     if (arr) {
@@ -24,22 +27,84 @@ MongoClient.connect(url, function(err, db) {
       item.town = arr[3]
       item.county = arr[4]
       item.zipcode = arr[5]
-      item.address = arr[6]
-      item.name = arr[7]
-      item.mobile = arr[8]
-      item.locations = (arr[9] == "{}") ? null : arr[9];
-      item.ndc = !(arr[10] == 'f');
-      item.rdc = !(arr[11] == 'f');
-      item.latitude = parseFloat(arr[12]) ? parseFloat(arr[12]) : null;
-      item.longitude = parseFloat(arr[13]) ? parseFloat(arr[13]) : null;
-      item.wh_id = arr[14];
-      item.case = arr[15];
+      if (arr[6].startsWith('"')) {
+        if (arr.length > 15) {
+          var i = arr.length - 1;
+          var addressArr = arr.slice(6, i - 7);
 
-      process.nextTick(function(){
+          var addressResult = /\"?([\w\W]*)\"?/.exec(addressArr.join(''));
+          if (addressResult && addressResult.length > 1) {
+            item.address = addressResult[1];
+          } else {
+            item.address = "";
+          }
+          item.name = arr[i - 8];
+          item.mobile = arr[i - 7];
+          item.locations = (arr[i - 6] == "{}") ? null : arr[i - 6];
+          item.ndc = !(arr[i - 5] == 'f');
+          item.rdc = !(arr[i - 4] == 'f');
+          item.latitude = parseFloat(arr[i - 3]) ? parseFloat(arr[i - 3]) : null;
+          item.longitude = parseFloat(arr[i - 2]) ? parseFloat(arr[i - 2]) : null;
+          item.wh_id = arr[i - 1];
+          item.case = arr[i];
+        } else {
+          item.mobile = arr[8]
+          item.locations = (arr[9] == "{}") ? null : arr[9];
+          item.ndc = !(arr[10] == 'f');
+          item.rdc = !(arr[11] == 'f');
+          item.latitude = parseFloat(arr[12]) ? parseFloat(arr[12]) : null;
+          item.longitude = parseFloat(arr[13]) ? parseFloat(arr[13]) : null;
+          item.wh_id = arr[14];
+          item.case = arr[15];
+        }
+      } else if (arr[7].startsWith('"')) {
+        item.address = arr[6];
+        if (arr.length > 15) {
+          var i = arr.length - 1;
+          var nameArr = arr.slice(7, i - 7);
+
+          var nameResult = /\"?([\w\W]*)\"?/.exec(nameArr.join(','));
+          if (nameResult && nameResult.length > 1) {
+            item.name = nameResult[1];
+          } else {
+            item.name = "";
+          }
+          item.mobile = arr[i - 7];
+          item.locations = (arr[i - 6] == "{}") ? null : arr[i - 6];
+          item.ndc = !(arr[i - 5] == 'f');
+          item.rdc = !(arr[i - 4] == 'f');
+          item.latitude = parseFloat(arr[i - 3]) ? parseFloat(arr[i - 3]) : null;
+          item.longitude = parseFloat(arr[i - 2]) ? parseFloat(arr[i - 2]) : null;
+          item.wh_id = arr[i - 1];
+          item.case = arr[i];
+        } else {
+          item.mobile = arr[8]
+          item.locations = (arr[9] == "{}") ? null : arr[9];
+          item.ndc = !(arr[10] == 'f');
+          item.rdc = !(arr[11] == 'f');
+          item.latitude = parseFloat(arr[12]) ? parseFloat(arr[12]) : null;
+          item.longitude = parseFloat(arr[13]) ? parseFloat(arr[13]) : null;
+          item.wh_id = arr[14];
+          item.case = arr[15];
+        }
+      } else {
+        item.address = arr[6]
+        item.name = arr[7]
+        item.mobile = arr[8]
+        item.locations = (arr[9] == "{}") ? null : arr[9];
+        item.ndc = !(arr[10] == 'f');
+        item.rdc = !(arr[11] == 'f');
+        item.latitude = parseFloat(arr[12]) ? parseFloat(arr[12]) : null;
+        item.longitude = parseFloat(arr[13]) ? parseFloat(arr[13]) : null;
+        item.wh_id = arr[14];
+        item.case = arr[15];
+      }
+
+      process.nextTick(function() {
         col_shipping.insert(item);
       })
     }
-  }, function(){
+  }, function() {
     console.log('end')
     db.close();
   })
